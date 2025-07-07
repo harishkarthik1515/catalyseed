@@ -12,232 +12,314 @@ interface ShareModalProps {
 const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, story, hackathon, type }) => {
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
   const data = type === 'story' ? story : hackathon;
 
   useEffect(() => {
-    if (data?.image && imageRef.current) {
+    if (data?.image) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         setImageLoaded(true);
+        if (imageRef.current) {
+          imageRef.current = img;
+        }
+      };
+      img.onerror = () => {
+        console.log('Image failed to load, using fallback');
+        setImageLoaded(false);
       };
       img.src = data.image;
-      imageRef.current = img;
     }
   }, [data?.image]);
 
   if (!isOpen) return null;
   if (!data) return null;
 
-  const generateShareImage = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size for social media sharing (1200x630 is optimal for most platforms)
-    canvas.width = 1200;
-    canvas.height = 630;
-
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#7c3aed');
-    gradient.addColorStop(1, '#ec4899');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add subtle pattern overlay
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    for (let i = 0; i < canvas.width; i += 80) {
-      for (let j = 0; j < canvas.height; j += 80) {
-        ctx.fillRect(i, j, 40, 40);
-      }
-    }
-
-    // Main content area with rounded corners
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
-    ctx.roundRect(40, 40, canvas.width - 80, canvas.height - 80, 20);
-    ctx.fill();
-
-    // Add shadow effect
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 10;
-
-    // Left side - Content
-    const contentWidth = 650;
-    const imageWidth = 450;
-    const padding = 60;
-
-    // Catalyseed logo area
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = '#7c3aed';
-    ctx.roundRect(padding, padding, 180, 50, 8);
-    ctx.fill();
-
-    // Logo text
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 18px Arial, sans-serif';
-    ctx.fillText('✨ Catalyseed', padding + 15, padding + 32);
-
-    // Title
-    ctx.fillStyle = '#1f2937';
-    ctx.font = 'bold 32px Arial, sans-serif';
-    const title = type === 'story' ? data.company : data.title;
-    const titleY = padding + 100;
-    
-    // Word wrap for title
-    const words = title.split(' ');
-    let line = '';
-    let y = titleY;
-    const lineHeight = 40;
-    
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' ';
-      const metrics = ctx.measureText(testLine);
-      
-      if (metrics.width > contentWidth - 40 && n > 0) {
-        ctx.fillText(line.trim(), padding, y);
-        line = words[n] + ' ';
-        y += lineHeight;
-        if (y > titleY + lineHeight * 2) break; // Max 3 lines
-      } else {
-        line = testLine;
-      }
-    }
-    ctx.fillText(line.trim(), padding, y);
-
-    // Description
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '18px Arial, sans-serif';
-    const description = data.description || '';
-    const descWords = description.split(' ').slice(0, 20).join(' ') + (description.split(' ').length > 20 ? '...' : '');
-    
-    // Word wrap for description
-    const descLines = [];
-    const descWordsArray = descWords.split(' ');
-    let descLine = '';
-    
-    for (let i = 0; i < descWordsArray.length; i++) {
-      const testLine = descLine + descWordsArray[i] + ' ';
-      const metrics = ctx.measureText(testLine);
-      
-      if (metrics.width > contentWidth - 40 && i > 0) {
-        descLines.push(descLine.trim());
-        descLine = descWordsArray[i] + ' ';
-        if (descLines.length >= 3) break; // Max 3 lines
-      } else {
-        descLine = testLine;
-      }
-    }
-    if (descLine.trim()) descLines.push(descLine.trim());
-
-    let descY = y + 60;
-    descLines.forEach((line, index) => {
-      ctx.fillText(line, padding, descY + (index * 25));
-    });
-
-    // Details section
-    const detailsY = descY + (descLines.length * 25) + 40;
-    ctx.fillStyle = '#374151';
-    ctx.font = '16px Arial, sans-serif';
-
-    if (type === 'story') {
-      ctx.fillText(`👤 Founder: ${data.founder}`, padding, detailsY);
-      ctx.fillText(`🏢 Institute: ${data.institute}`, padding, detailsY + 25);
-      ctx.fillText(`📍 Location: ${data.location}`, padding, detailsY + 50);
-      if (data.tags && data.tags.length > 0) {
-        ctx.fillText(`🏷️ Tags: ${data.tags.slice(0, 3).join(', ')}`, padding, detailsY + 75);
-      }
-    } else {
-      ctx.fillText(`📅 Date: ${data.date}`, padding, detailsY);
-      ctx.fillText(`📍 Location: ${data.location}`, padding, detailsY + 25);
-      ctx.fillText(`🏆 Prize Pool: ${data.prizePool}`, padding, detailsY + 50);
-      ctx.fillText(`👥 Participants: ${data.participants}`, padding, detailsY + 75);
-    }
-
-    // Right side - Image
-    if (imageLoaded && imageRef.current) {
-      const img = imageRef.current;
-      const imageX = canvas.width - imageWidth - padding;
-      const imageY = padding + 60;
-      const imageHeight = 300;
-
-      // Create clipping path for rounded image
-      ctx.save();
-      ctx.roundRect(imageX, imageY, imageWidth, imageHeight, 15);
-      ctx.clip();
-      
-      // Calculate aspect ratio and draw image
-      const aspectRatio = img.width / img.height;
-      let drawWidth = imageWidth;
-      let drawHeight = imageHeight;
-      let drawX = imageX;
-      let drawY = imageY;
-
-      if (aspectRatio > imageWidth / imageHeight) {
-        drawHeight = imageWidth / aspectRatio;
-        drawY = imageY + (imageHeight - drawHeight) / 2;
-      } else {
-        drawWidth = imageHeight * aspectRatio;
-        drawX = imageX + (imageWidth - drawWidth) / 2;
+  const generateShareImage = async (): Promise<void> => {
+    return new Promise((resolve) => {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        resolve();
+        return;
       }
 
-      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-      ctx.restore();
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve();
+        return;
+      }
 
-      // Add image border
-      ctx.strokeStyle = 'rgba(124, 58, 237, 0.2)';
-      ctx.lineWidth = 2;
-      ctx.roundRect(imageX, imageY, imageWidth, imageHeight, 15);
-      ctx.stroke();
-    } else {
-      // Fallback gradient box if image not loaded
-      const imageX = canvas.width - imageWidth - padding;
-      const imageY = padding + 60;
-      const imageHeight = 300;
+      // Set canvas size for portrait mode (optimal for mobile sharing)
+      canvas.width = 800;
+      canvas.height = 1200;
 
-      const imgGradient = ctx.createLinearGradient(imageX, imageY, imageX + imageWidth, imageY + imageHeight);
-      imgGradient.addColorStop(0, '#f3e8ff');
-      imgGradient.addColorStop(1, '#fce7f3');
-      ctx.fillStyle = imgGradient;
-      ctx.roundRect(imageX, imageY, imageWidth, imageHeight, 15);
+      // Clear canvas first
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#7c3aed');
+      gradient.addColorStop(1, '#ec4899');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Add subtle pattern overlay
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let i = 0; i < canvas.width; i += 60) {
+        for (let j = 0; j < canvas.height; j += 60) {
+          ctx.fillRect(i, j, 30, 30);
+        }
+      }
+
+      // Main content area with rounded corners
+      const contentPadding = 40;
+      const contentWidth = canvas.width - (contentPadding * 2);
+      const contentHeight = canvas.height - (contentPadding * 2);
+
+      // Draw rounded rectangle manually since roundRect might not be available
+      const drawRoundedRect = (x: number, y: number, width: number, height: number, radius: number) => {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      };
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+      drawRoundedRect(contentPadding, contentPadding, contentWidth, contentHeight, 20);
       ctx.fill();
 
-      // Add icon
+      const padding = 60;
+      let currentY = padding + 20;
+
+      // Catalyseed logo area
       ctx.fillStyle = '#7c3aed';
-      ctx.font = '48px Arial, sans-serif';
-      const icon = type === 'story' ? '✨' : '🏆';
-      ctx.fillText(icon, imageX + imageWidth/2 - 24, imageY + imageHeight/2 + 16);
-    }
+      drawRoundedRect(padding, currentY, 200, 50, 8);
+      ctx.fill();
 
-    // Footer
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '14px Arial, sans-serif';
-    ctx.fillText('Discover more innovation stories at catalyseed.com', padding, canvas.height - 60);
+      // Logo text
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 20px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✨ Catalyseed', padding + 20, currentY + 25);
 
-    // Tamil Nadu pride badge
-    ctx.fillStyle = '#7c3aed';
-    ctx.roundRect(canvas.width - 250, canvas.height - 90, 180, 30, 15);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 12px Arial, sans-serif';
-    ctx.fillText('🌟 Tamil Nadu Innovation', canvas.width - 240, canvas.height - 70);
+      currentY += 80;
+
+      // Image section
+      const imageHeight = 300;
+      const imageWidth = contentWidth - (padding * 2);
+      
+      if (imageLoaded && imageRef.current) {
+        const img = imageRef.current;
+        
+        // Create clipping path for rounded image
+        ctx.save();
+        drawRoundedRect(padding, currentY, imageWidth, imageHeight, 15);
+        ctx.clip();
+        
+        // Calculate aspect ratio and draw image
+        const aspectRatio = img.width / img.height;
+        let drawWidth = imageWidth;
+        let drawHeight = imageHeight;
+        let drawX = padding;
+        let drawY = currentY;
+
+        if (aspectRatio > imageWidth / imageHeight) {
+          drawHeight = imageWidth / aspectRatio;
+          drawY = currentY + (imageHeight - drawHeight) / 2;
+        } else {
+          drawWidth = imageHeight * aspectRatio;
+          drawX = padding + (imageWidth - drawWidth) / 2;
+        }
+
+        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        ctx.restore();
+
+        // Add image border
+        ctx.strokeStyle = 'rgba(124, 58, 237, 0.2)';
+        ctx.lineWidth = 2;
+        drawRoundedRect(padding, currentY, imageWidth, imageHeight, 15);
+        ctx.stroke();
+      } else {
+        // Fallback gradient box if image not loaded
+        const imgGradient = ctx.createLinearGradient(padding, currentY, padding + imageWidth, currentY + imageHeight);
+        imgGradient.addColorStop(0, '#f3e8ff');
+        imgGradient.addColorStop(1, '#fce7f3');
+        ctx.fillStyle = imgGradient;
+        drawRoundedRect(padding, currentY, imageWidth, imageHeight, 15);
+        ctx.fill();
+
+        // Add icon
+        ctx.fillStyle = '#7c3aed';
+        ctx.font = '64px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const icon = type === 'story' ? '✨' : '🏆';
+        ctx.fillText(icon, padding + imageWidth / 2, currentY + imageHeight / 2);
+      }
+
+      currentY += imageHeight + 40;
+
+      // Title
+      ctx.fillStyle = '#1f2937';
+      ctx.font = 'bold 36px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      const title = type === 'story' ? (data.company || 'Untitled') : (data.title || 'Untitled');
+      
+      // Word wrap for title
+      const words = title.split(' ');
+      let line = '';
+      const lineHeight = 45;
+      const maxWidth = contentWidth - (padding * 2);
+      
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), padding, currentY);
+          line = words[n] + ' ';
+          currentY += lineHeight;
+          if (currentY > canvas.height - 400) break;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), padding, currentY);
+
+      currentY += 50;
+
+      // Description
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '20px Arial, sans-serif';
+      const description = data.description || 'No description available';
+      const descWords = description.split(' ').slice(0, 30).join(' ') + (description.split(' ').length > 30 ? '...' : '');
+      
+      // Word wrap for description
+      const descLines = [];
+      const descWordsArray = descWords.split(' ');
+      let descLine = '';
+      
+      for (let i = 0; i < descWordsArray.length; i++) {
+        const testLine = descLine + descWordsArray[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && i > 0) {
+          descLines.push(descLine.trim());
+          descLine = descWordsArray[i] + ' ';
+          if (descLines.length >= 4) break;
+        } else {
+          descLine = testLine;
+        }
+      }
+      if (descLine.trim()) descLines.push(descLine.trim());
+
+      descLines.forEach((line, index) => {
+        ctx.fillText(line, padding, currentY + (index * 28));
+      });
+
+      currentY += (descLines.length * 28) + 50;
+
+      // Details section
+      ctx.fillStyle = '#374151';
+      ctx.font = '18px Arial, sans-serif';
+      const detailLineHeight = 35;
+
+      if (type === 'story') {
+        ctx.fillText(`👤 Founder: ${data.founder || 'Unknown'}`, padding, currentY);
+        currentY += detailLineHeight;
+        ctx.fillText(`🏢 Institute: ${data.institute || 'Unknown'}`, padding, currentY);
+        currentY += detailLineHeight;
+        ctx.fillText(`📍 Location: ${data.location || 'Unknown'}`, padding, currentY);
+        currentY += detailLineHeight;
+        if (data.tags && data.tags.length > 0) {
+          ctx.fillText(`🏷️ Tags: ${data.tags.slice(0, 3).join(', ')}`, padding, currentY);
+          currentY += detailLineHeight;
+        }
+      } else {
+        ctx.fillText(`📅 Date: ${data.date || 'TBD'}`, padding, currentY);
+        currentY += detailLineHeight;
+        ctx.fillText(`📍 Location: ${data.location || 'Unknown'}`, padding, currentY);
+        currentY += detailLineHeight;
+        ctx.fillText(`🏆 Prize Pool: ${data.prizePool || 'TBD'}`, padding, currentY);
+        currentY += detailLineHeight;
+        ctx.fillText(`👥 Participants: ${data.participants || 'TBD'}`, padding, currentY);
+        currentY += detailLineHeight;
+      }
+
+      // Footer section
+      currentY = canvas.height - 120;
+      
+      // Tamil Nadu pride badge
+      ctx.fillStyle = '#7c3aed';
+      const badgeWidth = 280;
+      const badgeHeight = 40;
+      const badgeX = (canvas.width - badgeWidth) / 2;
+      drawRoundedRect(badgeX, currentY, badgeWidth, badgeHeight, 20);
+      ctx.fill();
+      
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🌟 Tamil Nadu Innovation', badgeX + badgeWidth / 2, currentY + badgeHeight / 2);
+
+      // Website footer
+      currentY += 60;
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '16px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Discover more at catalyseed.com', canvas.width / 2, currentY);
+
+      // Use requestAnimationFrame to ensure rendering is complete
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
   };
 
-  const downloadImage = () => {
-    generateShareImage();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const downloadImage = async () => {
+    setIsGenerating(true);
+    
+    try {
+      await generateShareImage();
+      
+      // Small delay to ensure canvas is fully rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const link = document.createElement('a');
-    link.download = `catalyseed-${type}-${data.id}.png`;
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
+      // Convert to blob for better compatibility
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `catalyseed-${type}-${data.id || 'share'}.png`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png', 1.0);
+    } catch (error) {
+      console.error('Error generating image:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyLink = () => {
@@ -391,18 +473,34 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, story, hackath
               <h4 className="font-semibold text-gray-900 mb-4">Share on Social Media</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { name: 'Twitter', color: 'bg-blue-500 hover:bg-blue-600', icon: '🐦' },
-                  { name: 'LinkedIn', color: 'bg-blue-700 hover:bg-blue-800', icon: '💼' },
-                  { name: 'Facebook', color: 'bg-blue-600 hover:bg-blue-700', icon: '📘' },
-                  { name: 'WhatsApp', color: 'bg-green-500 hover:bg-green-600', icon: '💬' }
+                  { 
+                    name: 'Twitter', 
+                    color: 'bg-black hover:bg-gray-800', 
+                    svg: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  },
+                  { 
+                    name: 'LinkedIn', 
+                    color: 'bg-black hover:bg-gray-800', 
+                    svg: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                  },
+                  { 
+                    name: 'Facebook', 
+                    color: 'bg-black hover:bg-gray-800', 
+                    svg: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  },
+                  { 
+                    name: 'WhatsApp', 
+                    color: 'bg-black hover:bg-gray-800', 
+                    svg: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.531 3.488"/></svg>
+                  }
                 ].map((platform) => (
                   <button
                     key={platform.name}
                     onClick={() => shareToSocial(platform.name.toLowerCase())}
-                    className={`${platform.color} text-white p-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-105`}
+                    className={`${platform.color} text-white p-4 rounded-lg transition-all duration-200 flex items-center justify-center transform hover:scale-105`}
+                    title={`Share on ${platform.name}`}
                   >
-                    <span className="text-lg">{platform.icon}</span>
-                    <span className="text-sm font-medium">{platform.name}</span>
+                    {platform.svg}
                   </button>
                 ))}
               </div>
@@ -420,10 +518,13 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, story, hackath
                 </button>
                 <button
                   onClick={downloadImage}
-                  className="flex items-center justify-center space-x-2 p-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105"
+                  disabled={isGenerating}
+                  className="flex items-center justify-center space-x-2 p-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4" />
-                  <span className="font-medium">Download Share Image</span>
+                  <span className="font-medium">
+                    {isGenerating ? 'Generating...' : 'Download Share Image'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -436,22 +537,5 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, story, hackath
     </div>
   );
 };
-
-// Add roundRect method if not available
-if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
-  CanvasRenderingContext2D.prototype.roundRect = function(x: number, y: number, width: number, height: number, radius: number) {
-    this.beginPath();
-    this.moveTo(x + radius, y);
-    this.lineTo(x + width - radius, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + radius);
-    this.lineTo(x + width, y + height - radius);
-    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    this.lineTo(x + radius, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - radius);
-    this.lineTo(x, y + radius);
-    this.quadraticCurveTo(x, y, x + radius, y);
-    this.closePath();
-  };
-}
 
 export default ShareModal;

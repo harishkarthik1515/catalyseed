@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Search, Sparkles, User, LogIn, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
@@ -14,6 +14,8 @@ const Header = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,11 +62,35 @@ const Header = () => {
 
   const handleNavClick = (href: string) => {
     if (href.startsWith('#')) {
-      // Smooth scroll to section
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+      // If we're on the home page, smooth scroll to section
+      if (location.pathname === '/') {
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // If we're on a different page, navigate to home first, then scroll
+        navigate('/');
+        // Wait for navigation to complete, then scroll
+        setTimeout(() => {
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
       }
+    } else {
+      // For regular page navigation
+      navigate(href);
+    }
+    setIsMenuOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
     }
     setIsMenuOpen(false);
   };
@@ -75,11 +101,11 @@ const Header = () => {
   };
 
   const navigation = [
-    { name: 'Hackathons', href: '#hackathons' },
-    { name: 'Success Stories', href: '#success-stories' },
-    { name: 'Forum', href: '#community' },
-    { name: 'Community', href: '#community' },
-    { name: 'Testimonials', href: '#testimonials' },
+    { name: 'Hackathons', href: '/hackathons' }, // Changed to page route
+    { name: 'Success Stories', href: '#success-stories' }, // Keeps section anchor
+    { name: 'Forum', href: '/forum' }, // Changed to page route
+    { name: 'Community', href: '/community' }, // Changed to page route
+    { name: 'Testimonials', href: '#testimonials' }, // Keeps section anchor
   ];
 
   const getRoleColor = (role: string) => {
@@ -109,10 +135,9 @@ const Header = () => {
           }`}>
             
             {/* Logo */}
-            <Link 
-              to="/" 
+            <div 
               className="flex items-center flex-shrink-0 cursor-pointer min-w-0"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleLogoClick}
             >
               <div className={`bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center transition-all duration-300 ${
                 isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-6 h-6 sm:w-8 sm:h-8'
@@ -124,7 +149,7 @@ const Header = () => {
               }`}>
                 Catalyseed
               </span>
-            </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center flex-shrink-0">
@@ -132,34 +157,26 @@ const Header = () => {
                 // Compact navigation for scrolled state
                 <div className="flex items-center space-x-6">
                   {navigation.slice(0, 3).map((item) => (
-                    <a
+                    <button
                       key={item.name}
-                      href={item.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      }}
+                      onClick={() => handleNavClick(item.href)}
                       className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm whitespace-nowrap"
                     >
                       {item.name}
-                    </a>
+                    </button>
                   ))}
                 </div>
               ) : (
                 // Full navigation for normal state
                 <div className="flex items-center space-x-4 xl:space-x-6">
                   {navigation.map((item) => (
-                    <a
+                    <button
                       key={item.name}
-                      href={item.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      }}
+                      onClick={() => handleNavClick(item.href)}
                       className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm xl:text-base whitespace-nowrap"
                     >
                       {item.name}
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
@@ -302,11 +319,11 @@ const Header = () => {
             <div className="flex flex-col h-full">
               {/* Menu Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2" onClick={handleLogoClick}>
                   <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                     <Sparkles className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent cursor-pointer">
                     Catalyseed
                   </span>
                 </div>
@@ -340,17 +357,13 @@ const Header = () => {
                     </h3>
                     
                     {navigation.map((item) => (
-                      <a
+                      <button
                         key={item.name}
-                        href={item.href}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavClick(item.href);
-                        }}
+                        onClick={() => handleNavClick(item.href)}
                         className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 font-medium text-left"
                       >
                         <span>{item.name}</span>
-                      </a>
+                      </button>
                     ))}
 
                     {/* Auth Section */}
