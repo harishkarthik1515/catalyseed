@@ -101,10 +101,9 @@ const Header = () => {
   };
 
   const navigation = [
-    { name: 'Hackathons', href: '/hackathons' }, // Changed to page route
-    { name: 'Success Stories', href: '#success-stories' }, // Keeps section anchor
-    { name: 'Forum', href: '/forum' }, // Changed to page route
-    { name: 'Community', href: '/community' }, // Changed to page route
+    { name: 'Hackathons', href: '#hackathons' }, // Changed to page route
+    { name: 'Success Stories', href: '#success-stories' }, // Keeps section anchor 
+    { name: 'Community', href: '#community' }, // Changed to page route
     { name: 'Testimonials', href: '#testimonials' }, // Keeps section anchor
   ];
 
