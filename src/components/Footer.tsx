@@ -1,132 +1,157 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Heart } from 'lucide-react';
+import { Sparkles, MapPin, Phone, Mail, Twitter, Linkedin, Instagram, Youtube } from 'lucide-react';
 
-const Footer: React.FC = () => {
+const Footer = () => {
+  const footerLinks = {
+    platform: [
+      { name: 'Success Stories', href: '#success-stories' },
+      { name: 'Hackathons', href: '#hackathons' },
+      { name: 'Community', href: '#community' },
+      { name: 'Testimonials', href: '#testimonials' }
+    ],
+    resources: [
+      { name: 'Startup Guide', href: '#' },
+      { name: 'Funding Database', href: '#' },
+      { name: 'Mentorship', href: '#' },
+      { name: 'Events', href: '#' }
+    ],
+    support: [
+      { name: 'Help Center', href: '#' },
+      { name: 'Contact Us', href: '#' },
+      { name: 'Privacy Policy', href: '#' },
+      { name: 'Terms of Service', href: '#' }
+    ]
+  };
+
+  const socialLinks = [
+    { name: 'Twitter', icon: Twitter, href: '#' },
+    { name: 'LinkedIn', icon: Linkedin, href: '#' },
+    { name: 'Instagram', icon: Instagram, href: '#' },
+    { name: 'YouTube', icon: Youtube, href: '#' }
+  ];
+
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern"></div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          
-          {/* Brand Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center space-x-3">
-              <img 
-                src="/calayseed logo.png" 
-                alt="Catalyseed" 
-                className="h-12 w-auto"
-              />
-              <div className="h-8 w-px bg-gradient-to-b from-red-500 to-transparent"></div>
-              <span className="text-xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
-                Innovation Hub
-              </span>
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="py-12 sm:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
+            {/* Brand Section */}
+            <div className="sm:col-span-2 lg:col-span-2">
+              <div className="flex items-center space-x-2 mb-6">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <span className="text-xl sm:text-2xl font-bold">Catalyseed</span>
+              </div>
+              <p className="text-gray-400 mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
+                Empowering Tamil Nadu's next generation of entrepreneurs by showcasing innovation, connecting ecosystems, and catalyzing startup success across educational institutions.
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center space-x-3 text-gray-400">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>Chennai, Tamil Nadu, India</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-400">
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>+91 98765 43210</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-400">
+                  <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span>hello@catalyseed.com</span>
+                </div>
+              </div>
             </div>
-            
-            <p className="text-gray-300 leading-relaxed max-w-md">
-              Catalyseed is Tamil Nadu's premier platform showcasing innovation and entrepreneurship 
-              activities across educational institutes, fostering the next generation of startups and innovators.
-            </p>
-            
-            <div className="flex space-x-4">
-              {[
-                { icon: Facebook, href: '#', label: 'Facebook' },
-                { icon: Twitter, href: '#', label: 'Twitter' },
-                { icon: Linkedin, href: '#', label: 'LinkedIn' },
-                { icon: Instagram, href: '#', label: 'Instagram' }
-              ].map(({ icon: Icon, href, label }) => (
-                <a 
-                  key={label}
-                  href={href} 
-                  className="group p-3 bg-white/5 rounded-full border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300"
-                  aria-label={label}
-                >
-                  <Icon className="h-4 w-4 text-gray-400 group-hover:text-red-400 transition-colors" />
-                </a>
-              ))}
+
+            {/* Platform Links */}
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Platform</h3>
+              <ul className="space-y-2">
+                {footerLinks.platform.map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-white relative">
-              Quick Links
-              <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-red-500 to-red-600"></div>
-            </h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Hackathons', href: '#hackathons' },
-                { label: 'Success Stories', href: '#success-stories' },
-                { label: 'E-Cell Awards', href: '#awards' },
-                { label: 'Testimonials', href: '#testimonials' },
-                { label: 'About Us', href: '#' },
-                { label: 'Contact', href: '#' }
-              ].map(({ label, href }) => (
-                <li key={label}>
-                  <a 
-                    href={href} 
-                    className="text-gray-300 hover:text-red-400 transition-colors duration-200 flex items-center group"
-                  >
-                    <div className="w-1 h-1 bg-red-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Resources Links */}
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Resources</h3>
+              <ul className="space-y-2">
+                {footerLinks.resources.map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Contact Info */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-white relative">
-              Contact Us
-              <div className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-red-500 to-red-600"></div>
-            </h3>
-            <div className="space-y-4">
-              {[
-                { icon: Mail, text: 'info@catalyseed.in', href: 'mailto:info@catalyseed.in' },
-                { icon: Phone, text: '+91 98765 43210', href: 'tel:+919876543210' },
-                { icon: MapPin, text: 'Chennai, Tamil Nadu\nIndia - 600001', href: '#' }
-              ].map(({ icon: Icon, text, href }, index) => (
-                <a 
-                  key={index}
-                  href={href}
-                  className="flex items-start space-x-3 text-gray-300 hover:text-red-400 transition-colors duration-200 group"
-                >
-                  <div className="p-2 bg-red-500/10 rounded-lg group-hover:bg-red-500/20 transition-colors">
-                    <Icon className="h-4 w-4 text-red-500" />
-                  </div>
-                  <span className="whitespace-pre-line text-sm leading-relaxed">{text}</span>
-                </a>
-              ))}
+            {/* Support Links */}
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Support</h3>
+              <ul className="space-y-2">
+                {footerLinks.support.map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
-              <span>© 2024 Catalyseed. Made with</span>
-              <Heart className="h-4 w-4 text-red-500 fill-current animate-pulse" />
-              <span>in Tamil Nadu</span>
+        {/* Newsletter Section */}
+        <div className="py-6 sm:py-8 border-t border-gray-800">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+            <div>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Stay Updated</h3>
+              <p className="text-gray-400 text-sm sm:text-base">
+                Get the latest updates on hackathons, success stories, and startup opportunities.
+              </p>
             </div>
-            
-            <div className="flex flex-wrap justify-center md:justify-end space-x-6">
-              {[
-                'Privacy Policy',
-                'Terms of Service', 
-                'Cookie Policy',
-                'Sitemap'
-              ].map((link) => (
-                <a 
-                  key={link}
-                  href="#" 
-                  className="text-gray-400 hover:text-red-400 text-sm transition-colors duration-200"
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-3 sm:px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 text-white text-sm"
+              />
+              <button className="px-4 sm:px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-sm">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Footer */}
+        <div className="py-6 sm:py-8 border-t border-gray-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
+              © 2024 Catalyseed. All rights reserved. Built with ❤️ in Tamil Nadu.
+            </p>
+            <div className="flex space-x-4">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                 >
-                  {link}
+                  <social.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               ))}
             </div>

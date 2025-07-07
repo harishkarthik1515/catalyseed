@@ -1,49 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Menu, X, Home, Calendar, Trophy, Award, MessageSquare, Filter, ChevronDown, MapPin, Building, User, LogOut, Settings, Users, UserPlus, LogIn } from 'lucide-react';
-import { useFilters } from './GlobalFilter';
-import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import { Menu, X, Search, Sparkles, User, LogIn, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import SignupModal from './auth/SignupModal';
 
-interface HeaderProps {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (open: boolean) => void;
-  onNavigate: (page: string) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, onNavigate }) => {
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showSearchFilter, setShowSearchFilter] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showTubeUserDropdown, setShowTubeUserDropdown] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchFilterRef = useRef<HTMLDivElement>(null);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
-  const tubeUserDropdownRef = useRef<HTMLDivElement>(null);
-
-  const { user, isAuthenticated, logout } = useAuth();
-
-  const {
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setSelectedCategory,
-    selectedDistrict,
-    setSelectedDistrict,
-    selectedSector,
-    setSelectedSector,
-    selectedStatus,
-    setSelectedStatus,
-    clearFilters,
-    activeFiltersCount
-  } = useFilters();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -54,16 +28,7 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, onNavigate }
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-      if (searchFilterRef.current && !searchFilterRef.current.contains(event.target as Node)) {
-        setShowSearchFilter(false);
-      }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
-      }
-      if (tubeUserDropdownRef.current && !tubeUserDropdownRef.current.contains(event.target as Node)) {
-        setShowTubeUserDropdown(false);
       }
     };
 
@@ -71,675 +36,397 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, onNavigate }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navigationItems = [
-    { 
-      id: 'home', 
-      label: 'Home', 
-      href: '#home', 
-      icon: Home
-    },
-    { 
-      id: 'hackathons', 
-      label: 'Hackathons', 
-      href: '#hackathons', 
-      icon: Calendar
-    },
-    { 
-      id: 'success-stories', 
-      label: 'Success Stories', 
-      href: '#success-stories', 
-      icon: Trophy
-    },
-    { 
-      id: 'awards', 
-      label: 'E-Cell Awards', 
-      href: '#awards', 
-      icon: Award
-    },
-    { 
-      id: 'testimonials', 
-      label: 'Testimonials', 
-      href: '#testimonials', 
-      icon: MessageSquare
-    },
-    { 
-      id: 'forum', 
-      label: 'Forum & Community', 
-      href: '/forum', 
-      icon: Users
-    }
-  ];
+  // Close mobile menu when clicking outside or on navigation
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isMenuOpen && !target.closest('.mobile-menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
 
-  const categories = ['all', 'TECHNOLOGY', 'STARTUP', 'AGRICULTURE', 'HEALTHCARE', 'EDUCATION', 'FINANCE'];
-  const districts = ['all', 'Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli'];
-  const sectors = ['all', 'AgriTech', 'EdTech', 'HealthTech', 'FinTech', 'CleanTech', 'RetailTech'];
-  const statuses = ['all', 'upcoming', 'live', 'completed', 'featured'];
-
-  const handleNavClick = (href: string, id: string) => {
-    setShowDropdown(false);
-    setIsMenuOpen(false);
-    setShowSearchFilter(false);
-    setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-    
-    if (id === 'forum') {
-      onNavigate('forum');
-      window.history.pushState({}, '', '/forum');
+    if (isMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
     } else {
-      onNavigate('home');
-      window.history.pushState({}, '', '/');
-      // Smooth scroll to section after navigation
-      setTimeout(() => {
-        const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+      document.body.style.overflow = 'unset';
     }
-  };
 
-  const handleSearchClick = () => {
-    setShowSearchFilter(!showSearchFilter);
-    setShowDropdown(false);
-    setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-  };
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
 
-  const handleDashboardClick = () => {
-    onNavigate('dashboard');
-    window.history.pushState({}, '', '/dashboard');
-    setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-    setShowDropdown(false);
-    setIsMenuOpen(false);
-  };
-
-  const handleProfileClick = () => {
-    onNavigate('profile');
-    window.history.pushState({}, '', '/profile');
-    setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-    setShowDropdown(false);
-    setIsMenuOpen(false);
-  };
-
-  // FIXED: Enhanced home click handler with better event handling
-  const handleHomeClick = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleNavClick = (href: string) => {
+    if (href.startsWith('#')) {
+      // Smooth scroll to section
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-    
-    console.log('Logo clicked - navigating to home'); // Debug log
-    
-    // Close all dropdowns
-    setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-    setShowDropdown(false);
     setIsMenuOpen(false);
-    setShowSearchFilter(false);
-    
-    // Navigate to home
-    onNavigate('home');
-    window.history.pushState({}, '', '/');
-    
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLogout = () => {
     logout();
     setShowUserDropdown(false);
-    setShowTubeUserDropdown(false);
-    setShowDropdown(false);
-    setIsMenuOpen(false);
-    onNavigate('home');
-    window.history.pushState({}, '', '/');
   };
 
-  const switchToSignup = () => {
-    setShowLoginModal(false);
-    setShowSignupModal(true);
-  };
+  const navigation = [
+    { name: 'Hackathons', href: '#hackathons' },
+    { name: 'Success Stories', href: '#success-stories' },
+    { name: 'Forum', href: '#community' },
+    { name: 'Community', href: '#community' },
+    { name: 'Testimonials', href: '#testimonials' },
+  ];
 
-  const switchToLogin = () => {
-    setShowSignupModal(false);
-    setShowLoginModal(true);
-  };
-
-  // User Dropdown Component for reuse
-  const UserDropdownMenu = ({ isVisible, onClose }: { isVisible: boolean; onClose: () => void }) => {
-    if (!isVisible) return null;
-    
-    return (
-      <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200/50 py-2 z-50">
-        {/* User Info */}
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <img
-              src={user?.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400'}
-              alt={user?.name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-medium text-gray-900">{user?.name}</p>
-              <p className="text-sm text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        <div className="py-2">
-          <button
-            onClick={handleProfileClick}
-            className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors"
-          >
-            <User className="h-4 w-4 text-gray-400" />
-            <span className="text-gray-700">View Profile</span>
-          </button>
-
-          {(user?.role === 'admin' || user?.role === 'institute') && (
-            <button
-              onClick={handleDashboardClick}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors"
-            >
-              <Settings className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-700">Dashboard</span>
-            </button>
-          )}
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-red-50 text-red-600 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </div>
-    );
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'startup': return 'bg-purple-100 text-purple-800';
+      case 'investor': return 'bg-green-100 text-green-800';
+      case 'institute': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
     <>
-      {/* Original Header - Hidden on scroll */}
-      <header className={`bg-white shadow-lg sticky top-0 z-50 transition-all duration-500 ${isScrolled ? 'opacity-0 pointer-events-none -translate-y-full' : 'opacity-100'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo - FIXED: Added proper click handler */}
-            <div 
-              className="flex items-center cursor-pointer hover:opacity-80 transition-opacity" 
-              onClick={handleHomeClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleHomeClick();
-                }
-              }}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
+        isScrolled 
+          ? 'bg-transparent' 
+          : 'bg-white/95 backdrop-blur-md border-b border-gray-100'
+      }`}>
+        <div className={`w-full transition-all duration-300 ease-out ${
+          isScrolled 
+            ? 'max-w-4xl mx-auto my-2 sm:my-3 rounded-full bg-white/95 backdrop-blur-xl shadow-xl border border-white/20' 
+            : 'max-w-7xl mx-auto'
+        } px-3 sm:px-4 lg:px-8`}>
+          <div className={`flex items-center justify-between w-full transition-all duration-300 ${
+            isScrolled ? 'h-12 sm:h-14' : 'h-14 sm:h-16'
+          }`}>
+            
+            {/* Logo */}
+            <Link 
+              to="/" 
+              className="flex items-center flex-shrink-0 cursor-pointer min-w-0"
+              onClick={() => setIsMenuOpen(false)}
             >
-              <img 
-                src="/calayseed logo.png" 
-                alt="Catalyseed" 
-                className="h-10 w-auto"
-              />
-            </div>
+              <div className={`bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-6 h-6 sm:w-8 sm:h-8'
+              }`}>
+                <Sparkles className={`text-white ${isScrolled ? 'w-3 h-3 sm:w-4 sm:h-4' : 'w-3 h-3 sm:w-5 sm:h-5'}`} />
+              </div>
+              <span className={`ml-2 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent transition-all duration-300 ${
+                isScrolled ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'
+              }`}>
+                Catalyseed
+              </span>
+            </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-8">
-              {navigationItems.map((item) => (
-                <a 
-                  key={item.id}
-                  href={item.href} 
-                  className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(item.href, item.id);
-                  }}
-                >
-                  {item.label}
-                </a>
-              ))}
+            <nav className="hidden lg:flex items-center flex-shrink-0">
+              {isScrolled ? (
+                // Compact navigation for scrolled state
+                <div className="flex items-center space-x-6">
+                  {navigation.slice(0, 3).map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavClick(item.href);
+                      }}
+                      className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm whitespace-nowrap"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                // Full navigation for normal state
+                <div className="flex items-center space-x-4 xl:space-x-6">
+                  {navigation.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavClick(item.href);
+                      }}
+                      className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm xl:text-base whitespace-nowrap"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
+              )}
             </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={handleSearchClick}
-                className={`p-2 transition-colors rounded-lg relative ${
-                  showSearchFilter || activeFiltersCount > 0
-                    ? 'text-red-600 bg-red-50'
-                    : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
-                }`}
-              >
-                <Search className="h-5 w-5" />
-                {activeFiltersCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Auth Buttons / User Menu */}
-              {isAuthenticated && user ? (
-                <div className="relative" ref={userDropdownRef}>
-                  <button
-                    onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <img
-                      src={user.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400'}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  </button>
-
-                  <UserDropdownMenu isVisible={showUserDropdown} onClose={() => setShowUserDropdown(false)} />
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+              
+              {/* Search Bar */}
+              <div className={`relative transition-all duration-300 hidden md:block flex-shrink-0 ${
+                isSearchFocused 
+                  ? 'w-48 lg:w-56' 
+                  : isScrolled 
+                    ? 'w-20 lg:w-24' 
+                    : 'w-32 lg:w-40'
+              }`}>
+                <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                  <Search className={`text-gray-400 ${isScrolled ? 'h-3 w-3' : 'h-4 w-4'}`} />
                 </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => setShowLoginModal(true)}
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => setShowSignupModal(true)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              )}
+                <input
+                  type="text"
+                  placeholder={isScrolled ? "Search..." : "Search..."}
+                  className={`block w-full border rounded-lg transition-all duration-200 ${
+                    isScrolled 
+                      ? 'pl-6 sm:pl-7 pr-2 py-1 text-xs border-gray-200 focus:ring-1 focus:ring-purple-500 focus:border-transparent bg-white' 
+                      : 'pl-7 sm:pl-8 pr-2 sm:pr-3 py-1.5 sm:py-2 text-xs sm:text-sm border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white'
+                  }`}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+              </div>
 
-              <button 
-                className="lg:hidden p-2 text-gray-600 hover:text-red-600 transition-colors"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
+              {/* Auth Section */}
+              <div className="hidden sm:flex items-center space-x-2">
+                {user ? (
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setShowUserDropdown(!showUserDropdown)}
+                      className="flex items-center space-x-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 px-3 py-1.5 sm:px-4 sm:py-2"
+                    >
+                      <img
+                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=7c3aed&color=fff`}
+                        alt={user.name}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <span className="font-medium text-xs sm:text-sm text-gray-700 max-w-20 truncate">
+                        {user.name}
+                      </span>
+                      <ChevronDown className="w-3 h-3 text-gray-500" />
+                    </button>
 
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="lg:hidden py-4 border-t border-gray-200">
-              <nav className="flex flex-col space-y-4">
-                {navigationItems.map((item) => (
-                  <a 
-                    key={item.id}
-                    href={item.href} 
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavClick(item.href, item.id);
-                    }}
-                  >
-                    {item.label}
-                  </a>
-                ))}
-                {!isAuthenticated && (
-                  <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200">
+                    {/* User Dropdown */}
+                    {showUserDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                          <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </span>
+                        </div>
+                        <div className="py-1">
+                          {user.role !== 'general' ? (
+                            <Link
+                              to="/dashboard"
+                              className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              onClick={() => setShowUserDropdown(false)}
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Dashboard</span>
+                            </Link>
+                          ) : (
+                            <Link
+                              to="/profile"
+                              className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              onClick={() => setShowUserDropdown(false)}
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Profile</span>
+                            </Link>
+                          )}
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setShowLoginModal(true)}
-                      className="text-gray-700 hover:text-red-600 transition-colors font-medium text-left"
+                      className="text-gray-600 hover:text-gray-800 transition-colors duration-200 text-sm font-medium"
                     >
                       Sign In
                     </button>
                     <button
                       onClick={() => setShowSignupModal(true)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium text-left"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 hover:scale-105 px-3 py-1.5 sm:px-4 sm:py-2"
                     >
-                      Sign Up
+                      <span className="font-medium text-xs sm:text-sm whitespace-nowrap">Sign Up</span>
                     </button>
                   </div>
                 )}
-              </nav>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                className={`lg:hidden p-1.5 sm:p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100 text-gray-700 mobile-menu-container flex-shrink-0 ${
+                  isScrolled ? 'ml-1' : 'ml-2'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+              >
+                {isMenuOpen ? (
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                ) : (
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+                )}
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </header>
 
-      {/* Enhanced Tube Navbar - Appears on scroll */}
-      <div className={`fixed top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-500 px-2 sm:px-0 w-full sm:w-auto ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
-        <nav className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-full px-3 sm:px-4 lg:px-6 py-2.5 shadow-2xl border border-gray-200/50 max-w-full sm:max-w-none">
-          <div className="flex items-center justify-between">
-            {/* Logo - FIXED: Enhanced with better event handling and debugging */}
-            <div 
-              className="flex items-center flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity active:scale-95 transform duration-150" 
-              onClick={(e) => {
-                console.log('Tube navbar logo clicked'); // Debug log
-                handleHomeClick(e);
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleHomeClick();
-                }
-              }}
-              aria-label="Go to home page"
-            >
-              <img 
-                src="/calayseed logo.png" 
-                alt="Catalyseed" 
-                className="h-6 sm:h-7 lg:h-8 w-auto pointer-events-none"
-                draggable={false}
-              />
-            </div>
-
-            {/* Navigation Links - Hidden on smaller screens */}
-            <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 mx-6">
-              {navigationItems.slice(0, 5).map((item) => (
-                <a 
-                  key={item.id}
-                  href={item.href} 
-                  className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm whitespace-nowrap px-2 py-1 rounded-lg hover:bg-red-50"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(item.href, item.id);
-                  }}
-                >
-                  {item.id === 'success-stories' ? 'Stories' : 
-                   item.id === 'awards' ? 'Awards' : item.label}
-                </a>
-              ))}
-            </div>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              {/* Search Button */}
-              <button 
-                onClick={handleSearchClick}
-                className={`p-1.5 sm:p-2 transition-colors rounded-full relative ${
-                  showSearchFilter || activeFiltersCount > 0
-                    ? 'text-red-600 bg-red-50'
-                    : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
-                }`}
-              >
-                <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                {activeFiltersCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </button>
-
-              {/* User Menu or Auth Buttons */}
-              {isAuthenticated && user ? (
-                <div className="relative" ref={tubeUserDropdownRef}>
-                  <button
-                    onClick={() => setShowTubeUserDropdown(!showTubeUserDropdown)}
-                    className="flex items-center space-x-1 p-1.5 sm:p-2 rounded-full hover:bg-gray-50 transition-colors"
-                  >
-                    <img
-                      src={user.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400'}
-                      alt={user.name}
-                      className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover"
-                    />
-                    <ChevronDown className="h-3 w-3 text-gray-500" />
-                  </button>
-
-                  <UserDropdownMenu isVisible={showTubeUserDropdown} onClose={() => setShowTubeUserDropdown(false)} />
-                </div>
-              ) : (
-                <div className="hidden sm:flex items-center space-x-1">
-                  <button
-                    onClick={() => setShowLoginModal(true)}
-                    className="p-1.5 sm:p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                    aria-label="Sign In"
-                  >
-                    <LogIn className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setShowSignupModal(true)}
-                    className="p-1.5 sm:p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                    aria-label="Sign Up"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-
-              {/* Dropdown Menu Button */}
-              <div className="relative" ref={dropdownRef}>
-                <button 
-                  className="p-1.5 sm:p-2 text-gray-600 hover:text-red-600 transition-colors rounded-full hover:bg-red-50 relative"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <Menu className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                </button>
-
-                {/* Dropdown Menu */}
-                {showDropdown && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200/50 py-2 z-50">
-                    {navigationItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => handleNavClick(item.href, item.id)}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-red-50 transition-colors group"
-                        >
-                          <Icon className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
-                          <span className="text-gray-700 group-hover:text-red-600 font-medium">
-                            {item.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                    
-                    {/* Divider */}
-                    <div className="my-2 border-t border-gray-100"></div>
-                    
-                    {/* Search Action */}
-                    <button 
-                      onClick={handleSearchClick}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-red-50 transition-colors group"
-                    >
-                      <Search className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
-                      <span className="text-gray-700 group-hover:text-red-600 font-medium">
-                        Search & Filter
-                      </span>
-                      {activeFiltersCount > 0 && (
-                        <span className="ml-auto bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {activeFiltersCount}
-                        </span>
-                      )}
-                    </button>
-
-                    {/* Auth buttons for mobile */}
-                    {!isAuthenticated && (
-                      <>
-                        <div className="my-2 border-t border-gray-100"></div>
-                        <button
-                          onClick={() => setShowLoginModal(true)}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-red-50 transition-colors group"
-                        >
-                          <LogIn className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
-                          <span className="text-gray-700 group-hover:text-red-600 font-medium">Sign In</span>
-                        </button>
-                        <button
-                          onClick={() => setShowSignupModal(true)}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-red-50 transition-colors group"
-                        >
-                          <UserPlus className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
-                          <span className="text-gray-700 group-hover:text-red-600 font-medium">Sign Up</span>
-                        </button>
-                      </>
-                    )}
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+          
+          {/* Menu Panel */}
+          <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl mobile-menu-container overflow-hidden">
+            <div className="flex flex-col h-full">
+              {/* Menu Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-white" />
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </nav>
-      </div>
-
-      {/* Search & Filter Panel */}
-      {showSearchFilter && (
-        <div 
-          ref={searchFilterRef}
-          className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-30 w-full max-w-4xl px-4 transition-all duration-300 ${
-            isScrolled ? 'top-24' : 'top-20'
-          }`}
-        >
-          <div className={`bg-white/95 backdrop-blur-xl shadow-2xl border border-gray-200/50 overflow-hidden ${
-            isScrolled ? 'rounded-2xl' : 'rounded-2xl'
-          }`}>
-            {/* Search Header */}
-            <div className="p-4 border-b border-gray-200/50">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search across all content..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white/80"
-                  />
+                  <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Catalyseed
+                  </span>
                 </div>
                 <button
-                  onClick={() => setShowSearchFilter(false)}
-                  className="p-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="w-5 h-5 text-gray-600" />
                 </button>
               </div>
-            </div>
 
-            {/* Filter Options */}
-            <div className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {/* Category Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm bg-white"
-                  >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category === 'all' ? 'All Categories' : category}
-                      </option>
+              {/* Menu Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
+                  {/* Mobile Search */}
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-sm"
+                    />
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
+                      Navigation
+                    </h3>
+                    
+                    {navigation.map((item) => (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavClick(item.href);
+                        }}
+                        className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 font-medium text-left"
+                      >
+                        <span>{item.name}</span>
+                      </a>
                     ))}
-                  </select>
-                </div>
 
-                {/* District Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
-                  <select
-                    value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm bg-white"
-                  >
-                    {districts.map((district) => (
-                      <option key={district} value={district}>
-                        {district === 'all' ? 'All Districts' : district}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sector Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Sector</label>
-                  <select
-                    value={selectedSector}
-                    onChange={(e) => setSelectedSector(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm bg-white"
-                  >
-                    {sectors.map((sector) => (
-                      <option key={sector} value={sector}>
-                        {sector === 'all' ? 'All Sectors' : sector}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm bg-white"
-                  >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Active Filters & Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200/50">
-                <div className="flex flex-wrap gap-2">
-                  {searchTerm && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                      Search: "{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}"
-                      <button onClick={() => setSearchTerm('')}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  )}
-                  {selectedCategory !== 'all' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                      {selectedCategory}
-                      <button onClick={() => setSelectedCategory('all')}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  )}
-                  {selectedDistrict !== 'all' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                      {selectedDistrict}
-                      <button onClick={() => setSelectedDistrict('all')}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  )}
-                  {selectedSector !== 'all' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                      {selectedSector}
-                      <button onClick={() => setSelectedSector('all')}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  )}
-                  {selectedStatus !== 'all' && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                      {selectedStatus}
-                      <button onClick={() => setSelectedStatus('all')}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  {activeFiltersCount > 0 && (
-                    <button
-                      onClick={clearFilters}
-                      className="text-sm text-gray-600 hover:text-gray-800 font-medium"
-                    >
-                      Clear All
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setShowSearchFilter(false)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                  >
-                    Apply Filters
-                  </button>
+                    {/* Auth Section */}
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      {user ? (
+                        <div className="space-y-2">
+                          <div className="px-3 py-2">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=7c3aed&color=fff`}
+                                alt={user.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                              <div>
+                                <p className="font-medium text-gray-900">{user.name}</p>
+                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {user.role !== 'general' ? (
+                            <Link
+                              to="/dashboard"
+                              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Dashboard</span>
+                            </Link>
+                          ) : (
+                            <Link
+                              to="/profile"
+                              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <User className="w-4 h-4" />
+                              <span>Profile</span>
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => {
+                              handleLogout();
+                              setIsMenuOpen(false);
+                            }}
+                            className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-all duration-200 flex items-center justify-center space-x-2"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => {
+                              setShowLoginModal(true);
+                              setIsMenuOpen(false);
+                            }}
+                            className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-all duration-200 flex items-center justify-center space-x-2"
+                          >
+                            <LogIn className="w-4 h-4" />
+                            <span>Sign In</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowSignupModal(true);
+                              setIsMenuOpen(false);
+                            }}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
+                          >
+                            Sign Up
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -748,15 +435,21 @@ const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen, onNavigate }
       )}
 
       {/* Auth Modals */}
-      <LoginModal 
-        isOpen={showLoginModal} 
+      <LoginModal
+        isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onSwitchToSignup={switchToSignup}
+        onSwitchToSignup={() => {
+          setShowLoginModal(false);
+          setShowSignupModal(true);
+        }}
       />
-      <SignupModal 
-        isOpen={showSignupModal} 
+      <SignupModal
+        isOpen={showSignupModal}
         onClose={() => setShowSignupModal(false)}
-        onSwitchToLogin={switchToLogin}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setShowLoginModal(true);
+        }}
       />
     </>
   );
