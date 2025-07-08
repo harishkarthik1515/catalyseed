@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, Trophy, Clock, ArrowRight, Zap, Share2 } from 'lucide-react';
 import ShareModal from './ShareModal';
+import { useState, useRef, useEffect } from 'react';
 
 interface Hackathon {
   id: number;
@@ -21,6 +22,7 @@ interface Hackathon {
 
 const Hackathons = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [expandedHackathon, setExpandedHackathon] = useState<number | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedHackathon, setSelectedHackathon] = useState<Hackathon | null>(null);
 
@@ -166,6 +168,14 @@ const Hackathons = () => {
     setShareModalOpen(true);
   };
 
+  const handleMouseEnter = (hackathonId: number) => {
+    setExpandedHackathon(hackathonId);
+  };
+
+  const handleMouseLeave = () => {
+    setExpandedHackathon(null);
+  };
+
   return (
     <section id="hackathons" className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,12 +225,16 @@ const Hackathons = () => {
           <div
             ref={scrollRef}
             className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 mx-12"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
+            onMouseLeave={handleMouseLeave}
           >
             {hackathons.map((hackathon) => (
               <div
                 key={hackathon.id}
-                className="flex-shrink-0 w-80 h-[500px] group cursor-pointer"
+                className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
+                  expandedHackathon === hackathon.id ? 'w-[500px] z-10' : 'w-80'
+                } h-[500px]`}
+                onMouseEnter={() => handleMouseEnter(hackathon.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
                   {/* Hackathon Image */}
@@ -251,7 +265,20 @@ const Hackathons = () => {
                   {/* Hackathon Content */}
                   <div className="p-4 flex-1 flex flex-col">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">{hackathon.title}</h3>
-                    <p className="text-gray-600 mb-3 leading-relaxed text-sm line-clamp-2">{hackathon.description}</p>
+                    <p className={`text-gray-600 mb-3 leading-relaxed text-sm ${
+                      expandedHackathon === hackathon.id ? '' : 'line-clamp-2'
+                    }`}>
+                      {hackathon.description}
+                      {expandedHackathon === hackathon.id && (
+                        <span className="block mt-3 text-sm text-gray-700">
+                          <strong>Organizer:</strong> {hackathon.organizer}<br />
+                          <strong>Theme:</strong> {hackathon.theme}<br />
+                          <strong>Eligibility:</strong> Open to all students and professionals<br />
+                          <strong>Requirements:</strong> Participants should bring their own laptops and necessary equipment. 
+                          Teams of 3-5 members are recommended. Prior experience with the technology stack is beneficial but not mandatory.
+                        </span>
+                      )}
+                    </p>
                     
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 mb-3">

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Users, Trophy, Clock, Search, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const AllHackathons = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [expandedHackathon, setExpandedHackathon] = useState<number | null>(null);
 
   // Scroll to top on component mount
   useEffect(() => {
@@ -166,6 +168,14 @@ const AllHackathons = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const handleMouseEnter = (hackathonId: number) => {
+    setExpandedHackathon(hackathonId);
+  };
+
+  const handleMouseLeave = () => {
+    setExpandedHackathon(null);
+  };
+
   return (
     <div className="pt-16 sm:pt-20 pb-12 sm:pb-16 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -232,9 +242,15 @@ const AllHackathons = () => {
         </div>
 
         {/* Hackathons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
           {filteredHackathons.map((hackathon) => (
-            <div key={hackathon.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div 
+              key={hackathon.id} 
+              className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out group ${
+                expandedHackathon === hackathon.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+              }`}
+              onMouseEnter={() => handleMouseEnter(hackathon.id)}
+            >
               {/* Hackathon Image */}
               <div className="relative">
                 <img
@@ -259,9 +275,24 @@ const AllHackathons = () => {
               </div>
 
               {/* Hackathon Content */}
-              <div className="p-3 lg:p-4">
-                <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-2 line-clamp-2">{hackathon.title}</h3>
-                <p className="text-gray-600 mb-3 leading-relaxed text-sm line-clamp-3">{hackathon.description}</p>
+              <div className="p-4 relative">
+                <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                  {hackathon.title}
+                </h3>
+                <p className={`text-sm text-gray-600 mb-3 leading-relaxed ${
+                  expandedHackathon === hackathon.id ? '' : 'line-clamp-3'
+                }`}>
+                  {hackathon.description}
+                  {expandedHackathon === hackathon.id && (
+                    <span className="block mt-3 text-sm text-gray-700">
+                      <strong>Organizer:</strong> {hackathon.organizer}<br />
+                      <strong>Theme:</strong> {hackathon.theme}<br />
+                      <strong>Eligibility:</strong> Open to all students and professionals<br />
+                      <strong>Requirements:</strong> Participants should bring their own laptops and necessary equipment. 
+                      Teams of 3-5 members are recommended. Prior experience with the technology stack is beneficial but not mandatory.
+                    </span>
+                  )}
+                </p>
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">

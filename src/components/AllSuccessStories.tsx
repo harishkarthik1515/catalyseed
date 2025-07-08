@@ -10,6 +10,7 @@ const AllSuccessStories = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedStory, setSelectedStory] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [expandedStory, setExpandedStory] = useState<number | null>(null);
   const [initialCategory, setInitialCategory] = useState('all');
 
   // Scroll to top on component mount and restore position on back
@@ -203,6 +204,14 @@ const AllSuccessStories = () => {
     setShareModalOpen(true);
   };
 
+  const handleMouseEnter = (storyId: number) => {
+    setExpandedStory(storyId);
+  };
+
+  const handleMouseLeave = () => {
+    setExpandedStory(null);
+  };
+
   return (
     <div className="pt-16 sm:pt-20 pb-12 sm:pb-16 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -294,9 +303,15 @@ const AllSuccessStories = () => {
         </div>
 
         {/* Stories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
           {filteredStories.map((story) => (
-            <div key={story.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div 
+              key={story.id} 
+              className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out ${
+                expandedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+              }`}
+              onMouseEnter={() => handleMouseEnter(story.id)}
+            >
               {/* Story Header */}
               <div className="p-3 lg:p-4 flex items-center space-x-3">
                 <img
@@ -335,8 +350,22 @@ const AllSuccessStories = () => {
               </div>
 
               {/* Story Content */}
-              <div className="p-3 lg:p-4">
-                <p className="text-gray-800 mb-3 leading-relaxed text-sm line-clamp-3">{story.description}</p>
+              <div className="p-3 lg:p-4 relative">
+                <p className={`text-gray-600 mb-4 leading-relaxed text-sm ${
+                  expandedStory === story.id ? '' : 'line-clamp-2'
+                }`}>
+                  {story.description}
+                  {expandedStory === story.id && (
+                    <span className="block mt-3 text-sm text-gray-700">
+                      <strong>Founded by:</strong> {story.founder}<br />
+                      <strong>Institute:</strong> {story.institute}<br />
+                      <strong>Location:</strong> {story.location}<br />
+                      <strong>Impact:</strong> This startup has been making significant progress in their field, 
+                      attracting attention from investors and industry experts alike. Their innovative approach 
+                      to solving real-world problems has positioned them as a leader in the Tamil Nadu startup ecosystem.
+                    </span>
+                  )}
+                </p>
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">

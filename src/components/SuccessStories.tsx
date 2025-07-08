@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Share2, MapPin, Calendar, ArrowRight, Trophy, X, Download, Copy, Sparkles } from 'lucide-react';
 import ShareModal from './ShareModal';
+import { useState, useRef, useEffect } from 'react';
 
 interface Story {
   id: number;
@@ -19,6 +20,7 @@ interface Story {
 }
 
 const SuccessStories = () => {
+  const [expandedStory, setExpandedStory] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [likedStories, setLikedStories] = useState<Set<number>>(new Set());
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -170,6 +172,14 @@ const SuccessStories = () => {
     setShareModalOpen(true);
   };
 
+  const handleMouseEnter = (storyId: number) => {
+    setExpandedStory(storyId);
+  };
+
+  const handleMouseLeave = () => {
+    setExpandedStory(null);
+  };
+
   return (
     <section id="success-stories" className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,11 +230,15 @@ const SuccessStories = () => {
             ref={scrollRef}
             className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 mx-12"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onMouseLeave={handleMouseLeave}
           >
             {stories.map((story) => (
               <div
                 key={story.id}
-                className="flex-shrink-0 w-80 h-[520px] group cursor-pointer"
+                className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
+                  expandedStory === story.id ? 'w-[500px] z-10' : 'w-80'
+                } h-[520px]`}
+                onMouseEnter={() => handleMouseEnter(story.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
                   {/* Story Header */}
@@ -267,8 +281,22 @@ const SuccessStories = () => {
                   </div>
 
                   {/* Story Content */}
-                  <div className="p-3 flex-1 flex flex-col">
-                    <p className="text-gray-800 mb-3 leading-relaxed text-sm line-clamp-3">{story.description}</p>
+                  <div className="p-3 flex-1 flex flex-col relative">
+                    <p className={`text-gray-800 mb-3 leading-relaxed text-sm ${
+                      expandedStory === story.id ? '' : 'line-clamp-3'
+                    }`}>
+                      {story.description}
+                      {expandedStory === story.id && (
+                        <span className="block mt-3 text-sm text-gray-700">
+                          <strong>Founded by:</strong> {story.founder}<br />
+                          <strong>Institute:</strong> {story.institute}<br />
+                          <strong>Location:</strong> {story.location}<br />
+                          <strong>Impact:</strong> This startup has been making significant progress in their field, 
+                          attracting attention from investors and industry experts alike. Their innovative approach 
+                          to solving real-world problems has positioned them as a leader in the Tamil Nadu startup ecosystem.
+                        </span>
+                      )}
+                    </p>
                     
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 mb-3">
@@ -324,7 +352,7 @@ const SuccessStories = () => {
             
             {/* View More Card */}
             <div className="flex-shrink-0 w-80 h-[520px] group cursor-pointer">
-              <Link 
+              <Link
                 to="/success-stories"
                 onClick={handleViewMore}
                 className="block h-full"
