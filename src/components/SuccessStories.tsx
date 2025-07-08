@@ -20,6 +20,7 @@ interface Story {
 
 const SuccessStories = () => {
   const [expandedStory, setExpandedStory] = useState<number | null>(null);
+  const [clickedStory, setClickedStory] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [likedStories, setLikedStories] = useState<Set<number>>(new Set());
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -179,6 +180,14 @@ const SuccessStories = () => {
     setExpandedStory(null);
   };
 
+  const handleCardClick = (storyId: number) => {
+    if (clickedStory === storyId) {
+      setClickedStory(null);
+    } else {
+      setClickedStory(storyId);
+    }
+  };
+
   return (
     <section id="success-stories" className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -235,9 +244,10 @@ const SuccessStories = () => {
               <div
                 key={story.id}
                 className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
-                  expandedStory === story.id ? 'w-[500px] z-10' : 'w-80'
+                  expandedStory === story.id || clickedStory === story.id ? 'w-[600px] z-10' : 'w-80'
                 } h-[520px]`}
                 onMouseEnter={() => handleMouseEnter(story.id)}
+                onClick={() => handleCardClick(story.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
                   {/* Story Header */}
@@ -282,10 +292,10 @@ const SuccessStories = () => {
                   {/* Story Content */}
                   <div className="p-3 flex-1 flex flex-col relative">
                     <p className={`text-gray-800 mb-3 leading-relaxed text-sm ${
-                      expandedStory === story.id ? '' : 'line-clamp-3'
+                      expandedStory === story.id || clickedStory === story.id ? '' : 'line-clamp-3'
                     }`}>
                       {story.description}
-                      {expandedStory === story.id && (
+                      {(expandedStory === story.id || clickedStory === story.id) && (
                         <span className="block mt-3 text-sm text-gray-700">
                           <strong>Founded by:</strong> {story.founder}<br />
                           <strong>Institute:</strong> {story.institute}<br />
@@ -317,7 +327,7 @@ const SuccessStories = () => {
                     {/* Engagement - Only Like and Share */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
                       <div className="flex items-center space-x-3">
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

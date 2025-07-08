@@ -6,6 +6,7 @@ const AllHackathons = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [expandedHackathon, setExpandedHackathon] = useState<number | null>(null);
+  const [clickedHackathon, setClickedHackathon] = useState<number | null>(null);
 
   // Scroll to top on component mount
   useEffect(() => {
@@ -175,6 +176,14 @@ const AllHackathons = () => {
     setExpandedHackathon(null);
   };
 
+  const handleCardClick = (hackathonId: number) => {
+    if (clickedHackathon === hackathonId) {
+      setClickedHackathon(null);
+    } else {
+      setClickedHackathon(hackathonId);
+    }
+  };
+
   return (
     <div className="pt-16 sm:pt-20 pb-12 sm:pb-16 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -243,12 +252,13 @@ const AllHackathons = () => {
         {/* Hackathons Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
           {filteredHackathons.map((hackathon) => (
-            <div 
-              key={hackathon.id} 
+            <div
+              key={hackathon.id}
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out group ${
-                expandedHackathon === hackathon.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+                expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
               }`}
               onMouseEnter={() => handleMouseEnter(hackathon.id)}
+              onClick={() => handleCardClick(hackathon.id)}
             >
               {/* Hackathon Image */}
               <div className="relative">
@@ -279,10 +289,10 @@ const AllHackathons = () => {
                   {hackathon.title}
                 </h3>
                 <p className={`text-sm text-gray-600 mb-3 leading-relaxed ${
-                  expandedHackathon === hackathon.id ? '' : 'line-clamp-3'
+                  expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? '' : 'line-clamp-3'
                 }`}>
                   {hackathon.description}
-                  {expandedHackathon === hackathon.id && (
+                  {(expandedHackathon === hackathon.id || clickedHackathon === hackathon.id) && (
                     <span className="block mt-3 text-sm text-gray-700">
                       <strong>Organizer:</strong> {hackathon.organizer}<br />
                       <strong>Theme:</strong> {hackathon.theme}<br />
@@ -295,7 +305,7 @@ const AllHackathons = () => {
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {hackathon.tags.slice(0, 2).map((tag, index) => (
+                  <div className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
                     <span
                       key={index}
                       className="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs"
@@ -316,15 +326,15 @@ const AllHackathons = () => {
                     <Calendar className="w-3 h-3" />
                     <span className="truncate">{hackathon.date}</span>
                   </div>
-                  <div className="flex items-center space-x-1 text-gray-600">
+                  <div className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
                     <MapPin className="w-3 h-3" />
                     <span className="truncate">{hackathon.location}</span>
                   </div>
-                  <div className="flex items-center space-x-1 text-gray-600">
+                  <div className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
                     <Users className="w-3 h-3" />
                     <span className="truncate">{hackathon.participants}</span>
                   </div>
-                  <div className="flex items-center space-x-1 text-gray-600">
+                  <div className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
                     <Trophy className="w-3 h-3" />
                     <span className="truncate">{hackathon.prizePool}</span>
                   </div>
@@ -332,11 +342,11 @@ const AllHackathons = () => {
 
                 {/* Deadline and Action */}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex items-center space-x-1 text-orange-600">
+                  <div className="flex items-center space-x-1 text-orange-600 whitespace-nowrap">
                     <Clock className="w-3 h-3" />
                     <span className="text-xs font-medium">{hackathon.deadline}</span>
                   </div>
-                  <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-xs">
+                  <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-xs whitespace-nowrap">
                     {hackathon.status === 'Registration Open' ? 'Register' : 'Notify'}
                   </button>
                 </div>

@@ -22,6 +22,7 @@ interface Hackathon {
 const Hackathons = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [expandedHackathon, setExpandedHackathon] = useState<number | null>(null);
+  const [clickedHackathon, setClickedHackathon] = useState<number | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedHackathon, setSelectedHackathon] = useState<Hackathon | null>(null);
 
@@ -175,6 +176,14 @@ const Hackathons = () => {
     setExpandedHackathon(null);
   };
 
+  const handleCardClick = (hackathonId: number) => {
+    if (clickedHackathon === hackathonId) {
+      setClickedHackathon(null);
+    } else {
+      setClickedHackathon(hackathonId);
+    }
+  };
+
   return (
     <section id="hackathons" className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,9 +240,10 @@ const Hackathons = () => {
               <div
                 key={hackathon.id}
                 className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
-                  expandedHackathon === hackathon.id ? 'w-[500px] z-10' : 'w-80'
+                  expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? 'w-[600px] z-10' : 'w-80'
                 } h-[500px]`}
                 onMouseEnter={() => handleMouseEnter(hackathon.id)}
+                onClick={() => handleCardClick(hackathon.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
                   {/* Hackathon Image */}
@@ -265,10 +275,10 @@ const Hackathons = () => {
                   <div className="p-4 flex-1 flex flex-col">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">{hackathon.title}</h3>
                     <p className={`text-gray-600 mb-3 leading-relaxed text-sm ${
-                      expandedHackathon === hackathon.id ? '' : 'line-clamp-2'
+                      expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? '' : 'line-clamp-2'
                     }`}>
                       {hackathon.description}
-                      {expandedHackathon === hackathon.id && (
+                      {(expandedHackathon === hackathon.id || clickedHackathon === hackathon.id) && (
                         <span className="block mt-3 text-sm text-gray-700">
                           <strong>Organizer:</strong> {hackathon.organizer}<br />
                           <strong>Theme:</strong> {hackathon.theme}<br />
@@ -321,7 +331,7 @@ const Hackathons = () => {
                     {/* Deadline and Action */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-1 text-orange-600">
+                        <div className="flex items-center space-x-1 text-orange-600 whitespace-nowrap">
                           <Clock className="w-4 h-4" />
                           <span className="text-xs font-medium">{hackathon.deadline}</span>
                         </div>
@@ -332,7 +342,7 @@ const Hackathons = () => {
                           <Share2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-sm transform hover:scale-105">
+                      <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium text-xs whitespace-nowrap">
                         {hackathon.status === 'Registration Open' ? 'Register' : 'Notify'}
                       </button>
                     </div>

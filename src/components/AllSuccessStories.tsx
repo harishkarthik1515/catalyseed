@@ -11,6 +11,7 @@ const AllSuccessStories = () => {
   const [selectedStory, setSelectedStory] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [expandedStory, setExpandedStory] = useState<number | null>(null);
+  const [clickedStory, setClickedStory] = useState<number | null>(null);
   const [initialCategory, setInitialCategory] = useState('all');
 
   // Scroll to top on component mount and restore position on back
@@ -212,6 +213,14 @@ const AllSuccessStories = () => {
     setExpandedStory(null);
   };
 
+  const handleCardClick = (storyId: number) => {
+    if (clickedStory === storyId) {
+      setClickedStory(null);
+    } else {
+      setClickedStory(storyId);
+    }
+  };
+
   return (
     <div className="pt-16 sm:pt-20 pb-12 sm:pb-16 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -306,11 +315,12 @@ const AllSuccessStories = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
           {filteredStories.map((story) => (
             <div 
-              key={story.id} 
+              key={story.id}
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out ${
-                expandedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+                expandedStory === story.id || clickedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
               }`}
               onMouseEnter={() => handleMouseEnter(story.id)}
+              onClick={() => handleCardClick(story.id)}
             >
               {/* Story Header */}
               <div className="p-3 lg:p-4 flex items-center space-x-3">
@@ -352,10 +362,10 @@ const AllSuccessStories = () => {
               {/* Story Content */}
               <div className="p-3 lg:p-4 relative">
                 <p className={`text-gray-600 mb-4 leading-relaxed text-sm ${
-                  expandedStory === story.id ? '' : 'line-clamp-2'
+                  expandedStory === story.id || clickedStory === story.id ? '' : 'line-clamp-2'
                 }`}>
                   {story.description}
-                  {expandedStory === story.id && (
+                  {(expandedStory === story.id || clickedStory === story.id) && (
                     <span className="block mt-3 text-sm text-gray-700">
                       <strong>Founded by:</strong> {story.founder}<br />
                       <strong>Institute:</strong> {story.institute}<br />
@@ -369,7 +379,7 @@ const AllSuccessStories = () => {
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {story.tags.slice(0, 2).map((tag, index) => (
+                  {story.tags.slice(0, (expandedStory === story.id || clickedStory === story.id) ? story.tags.length : 2).map((tag, index) => (
                     <span
                       key={index}
                       className="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs"
@@ -377,7 +387,7 @@ const AllSuccessStories = () => {
                       {tag}
                     </span>
                   ))}
-                  {story.tags.length > 2 && (
+                  {story.tags.length > 2 && !(expandedStory === story.id || clickedStory === story.id) && (
                     <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
                       +{story.tags.length - 2}
                     </span>
