@@ -308,7 +308,7 @@ const AllSuccessStories = () => {
             <div 
               key={story.id} 
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out ${
-                expandedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+                expandedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105 row-span-2' : ''
               }`}
               onMouseEnter={() => handleMouseEnter(story.id)}
             >
@@ -352,17 +352,26 @@ const AllSuccessStories = () => {
               {/* Story Content */}
               <div className="p-3 lg:p-4 relative">
                 <p className={`text-gray-600 mb-4 leading-relaxed text-sm ${
-                  expandedStory === story.id ? '' : 'line-clamp-2'
+                  expandedStory === story.id ? 'max-h-[300px] overflow-y-auto pr-2' : 'line-clamp-2'
                 }`}>
                   {story.description}
                   {expandedStory === story.id && (
-                    <span className="block mt-3 text-sm text-gray-700">
+                    <span className="block mt-4 text-sm text-gray-700 border-t pt-4 border-gray-100">
                       <strong>Founded by:</strong> {story.founder}<br />
                       <strong>Institute:</strong> {story.institute}<br />
                       <strong>Location:</strong> {story.location}<br />
-                      <strong>Impact:</strong> This startup has been making significant progress in their field, 
+                      <strong>Impact:</strong> This startup has been making significant progress in their field,<br /> 
                       attracting attention from investors and industry experts alike. Their innovative approach 
-                      to solving real-world problems has positioned them as a leader in the Tamil Nadu startup ecosystem.
+                      to solving real-world problems has positioned them as a leader in the Tamil Nadu startup ecosystem.<br /><br />
+                      <strong>Achievements:</strong><br />
+                      • Successfully raised funding of ₹2.5 Crores<br />
+                      • Expanded to 5 districts across Tamil Nadu<br />
+                      • Impacted over 10,000 beneficiaries<br />
+                      • Created 50+ jobs in the local community<br /><br />
+                      <strong>Future Plans:</strong><br />
+                      • Expansion to neighboring states<br />
+                      • Launch of new product line<br />
+                      • Partnerships with government agencies
                     </span>
                   )}
                 </p>
@@ -409,6 +418,15 @@ const AllSuccessStories = () => {
                   </button>
                 </div>
               </div>
+              
+              {/* Connect Button - Only visible on hover */}
+              {expandedStory === story.id && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                  <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2.5 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium shadow-lg">
+                    Connect with Founder
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -231,11 +231,11 @@ const Hackathons = () => {
               <div
                 key={hackathon.id}
                 className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
-                  expandedHackathon === hackathon.id ? 'w-[500px] z-10' : 'w-80'
+                  expandedHackathon === hackathon.id ? 'w-[600px] z-10' : 'w-80'
                 } h-[500px]`}
                 onMouseEnter={() => handleMouseEnter(hackathon.id)}
               >
-                <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col relative">
                   {/* Hackathon Image */}
                   <div className="relative h-40 overflow-hidden flex-shrink-0">
                     <img
@@ -265,16 +265,24 @@ const Hackathons = () => {
                   <div className="p-4 flex-1 flex flex-col">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">{hackathon.title}</h3>
                     <p className={`text-gray-600 mb-3 leading-relaxed text-sm ${
-                      expandedHackathon === hackathon.id ? '' : 'line-clamp-2'
+                      expandedHackathon === hackathon.id ? 'max-h-[250px] overflow-y-auto pr-2' : 'line-clamp-2'
                     }`}>
                       {hackathon.description}
                       {expandedHackathon === hackathon.id && (
-                        <span className="block mt-3 text-sm text-gray-700">
+                        <span className="block mt-4 text-sm text-gray-700 border-t pt-4 border-gray-100">
                           <strong>Organizer:</strong> {hackathon.organizer}<br />
                           <strong>Theme:</strong> {hackathon.theme}<br />
-                          <strong>Eligibility:</strong> Open to all students and professionals<br />
-                          <strong>Requirements:</strong> Participants should bring their own laptops and necessary equipment. 
-                          Teams of 3-5 members are recommended. Prior experience with the technology stack is beneficial but not mandatory.
+                          <strong>Eligibility:</strong> Open to all students and professionals<br /><br />
+                          <strong>Requirements:</strong><br />
+                          • Participants should bring their own laptops and necessary equipment<br />
+                          • Teams of 3-5 members are recommended<br />
+                          • Prior experience with the technology stack is beneficial<br />
+                          • All team members must register individually<br /><br />
+                          <strong>Judging Criteria:</strong><br />
+                          • Innovation and Creativity: 30%<br />
+                          • Technical Implementation: 25%<br />
+                          • Business Potential: 25%<br />
+                          • Presentation: 20%
                         </span>
                       )}
                     </p>
@@ -338,6 +346,15 @@ const Hackathons = () => {
                     </div>
                   </div>
                 </div>
+                
+                {/* Register Button - Only visible on hover */}
+                {expandedHackathon === hackathon.id && (
+                  <div className="absolute bottom-16 left-0 right-0 flex justify-center pb-4">
+                    <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2.5 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium shadow-lg">
+                      {hackathon.status === 'Registration Open' ? 'Register Now' : 'Get Notified'}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
             
