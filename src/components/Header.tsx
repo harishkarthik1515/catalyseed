@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Search, Sparkles, User, LogIn, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Menu, X, Search, Sparkles, User, LogIn, LogOut, Settings, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import SignupModal from './auth/SignupModal';
@@ -12,8 +12,10 @@ const Header = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showSuccessStoriesDropdown, setShowSuccessStoriesDropdown] = useState(false);
   const { user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const successStoriesDropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -31,6 +33,9 @@ const Header = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
+      }
+      if (successStoriesDropdownRef.current && !successStoriesDropdownRef.current.contains(event.target as Node)) {
+        setShowSuccessStoriesDropdown(false);
       }
     };
 
@@ -95,6 +100,25 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  const handleSuccessStoriesClick = (category?: string) => {
+    if (category) {
+      navigate('/success-stories');
+      // Pass the category as a query parameter
+      setTimeout(() => {
+        const element = document.querySelector(`[data-category="${category}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          // Simulate a click on the category tab
+          (element as HTMLElement).click();
+        }
+      }, 100);
+    } else {
+      handleNavClick('#success-stories');
+    }
+    setShowSuccessStoriesDropdown(false);
+    setIsMenuOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
     setShowUserDropdown(false);
@@ -102,7 +126,16 @@ const Header = () => {
 
   const navigation = [
     { name: 'Hackathons', href: '#hackathons' }, // Changed to page route
-    { name: 'Success Stories', href: '#success-stories' }, // Keeps section anchor 
+    { 
+      name: 'Success Stories', 
+      href: '#success-stories',
+      hasDropdown: true,
+      dropdownItems: [
+        { name: 'All Stories', href: '/success-stories' },
+        { name: 'Pink Zone', href: '/success-stories', category: 'pink-zone' },
+        { name: 'Campus Startups', href: '/success-stories', category: 'campus' }
+      ]
+    },
     { name: 'Community', href: '#community' }, // Changed to page route
     { name: 'Testimonials', href: '#testimonials' }, // Keeps section anchor
   ];
@@ -169,13 +202,44 @@ const Header = () => {
                 // Full navigation for normal state
                 <div className="flex items-center space-x-4 xl:space-x-6">
                   {navigation.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => handleNavClick(item.href)}
-                      className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm xl:text-base whitespace-nowrap"
-                    >
-                      {item.name}
-                    </button>
+                    item.hasDropdown ? (
+                      <div key={item.name} className="relative" ref={successStoriesDropdownRef}>
+                        <button
+                          onClick={() => setShowSuccessStoriesDropdown(!showSuccessStoriesDropdown)}
+                          className="flex items-center text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm xl:text-base whitespace-nowrap"
+                        >
+                          <span>{item.name}</span>
+                          <ChevronDown className={`ml-1 w-4 h-4 transition-transform duration-200 ${showSuccessStoriesDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        {/* Success Stories Dropdown */}
+                        {showSuccessStoriesDropdown && (
+                          <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                            {item.dropdownItems?.map((dropdownItem, index) => (
+                              <button
+                                key={index}
+                                onClick={() => dropdownItem.category ? 
+                                  handleSuccessStoriesClick(dropdownItem.category) : 
+                                  handleNavClick(dropdownItem.href)
+                                }
+                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                              >
+                                {dropdownItem.name}
+                                {dropdownItem.category && <ChevronRight className="ml-auto w-4 h-4" />}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        key={item.name}
+                        onClick={() => handleNavClick(item.href)}
+                        className="text-gray-700 hover:text-purple-600 transition-colors duration-200 font-medium text-sm xl:text-base whitespace-nowrap"
+                      >
+                        {item.name}
+                      </button>
+                    )
                   ))}
                 </div>
               )}
@@ -357,11 +421,28 @@ const Header = () => {
                     
                     {navigation.map((item) => (
                       <button
-                        key={item.name}
-                        onClick={() => handleNavClick(item.href)}
-                        className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 font-medium text-left"
+                        key={item.name} 
+                        onClick={() => item.hasDropdown ? null : handleNavClick(item.href)}
+                        className="w-full flex items-center justify-between px-3 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 font-medium text-left"
                       >
                         <span>{item.name}</span>
+                        {item.hasDropdown && (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                    ))}
+                    
+                    {/* Mobile Success Stories Dropdown Items */}
+                    {navigation.find(item => item.hasDropdown)?.dropdownItems?.map((dropdownItem, index) => (
+                      <button
+                        key={`dropdown-${index}`}
+                        onClick={() => dropdownItem.category ? 
+                          handleSuccessStoriesClick(dropdownItem.category) : 
+                          handleNavClick(dropdownItem.href)
+                        }
+                        className="w-full flex items-center space-x-3 px-6 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 text-left"
+                      >
+                        <span className="text-sm">{dropdownItem.name}</span>
                       </button>
                     ))}
 

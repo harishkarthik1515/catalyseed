@@ -10,11 +10,20 @@ const AllSuccessStories = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedStory, setSelectedStory] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [initialCategory, setInitialCategory] = useState('all');
 
   // Scroll to top on component mount and restore position on back
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Check URL parameters for category filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category');
+    if (category) {
+      setActiveCategory(category);
+      setInitialCategory(category);
+    }
     
     // Clean up scroll position when component unmounts
     return () => {
@@ -228,12 +237,13 @@ const AllSuccessStories = () => {
         <div className="mb-8">
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-md">
             {[
-              { id: 'all', label: 'All Stories' },
-              { id: 'pink-zone', label: 'Pink Zone' },
-              { id: 'campus', label: 'Campus Startups' }
+              { id: 'all', label: 'All Stories', dataCategory: 'all' },
+              { id: 'pink-zone', label: 'Pink Zone', dataCategory: 'pink-zone' },
+              { id: 'campus', label: 'Campus Startups', dataCategory: 'campus' }
             ].map((category) => (
               <button
                 key={category.id}
+                data-category={category.dataCategory}
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                   activeCategory === category.id
