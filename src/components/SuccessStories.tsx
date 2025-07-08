@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, Share2, MapPin, Calendar, ArrowRight, Trophy, X, Download, Copy, Sparkles } from 'lucide-react';
 import ShareModal from './ShareModal';
-import { useState, useRef, useEffect } from 'react';
 
 interface Story {
   id: number;
