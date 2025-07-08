@@ -305,7 +305,7 @@ const AllHackathons = () => {
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">
-                  <div className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
+                  {hackathon.tags.slice(0, 2).map((tag, index) => (
                     <span
                       key={index}
                       className="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs"
