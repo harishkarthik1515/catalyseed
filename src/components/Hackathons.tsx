@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, Trophy, Clock, ArrowRight, Zap, Share2 } from 'lucide-react';
 import ShareModal from './ShareModal';
-import { useState, useRef, useEffect } from 'react';
 
 interface Hackathon {
   id: number;
