@@ -169,18 +169,20 @@ const AllHackathons = () => {
   });
 
   const handleMouseEnter = (hackathonId: number) => {
-    setExpandedHackathon(hackathonId);
+    // Remove hover expansion - now only click-based
   };
 
   const handleMouseLeave = () => {
-    setExpandedHackathon(null);
+    // Remove hover expansion - now only click-based
   };
 
   const handleCardClick = (hackathonId: number) => {
     if (clickedHackathon === hackathonId) {
       setClickedHackathon(null);
+      setExpandedHackathon(null);
     } else {
       setClickedHackathon(hackathonId);
+      setExpandedHackathon(hackathonId);
     }
   };
 
@@ -250,14 +252,13 @@ const AllHackathons = () => {
         </div>
 
         {/* Hackathons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {filteredHackathons.map((hackathon) => (
             <div
               key={hackathon.id}
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out group ${
-                expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+                clickedHackathon === hackathon.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
               }`}
-              onMouseEnter={() => handleMouseEnter(hackathon.id)}
               onClick={() => handleCardClick(hackathon.id)}
             >
               {/* Hackathon Image */}
@@ -289,10 +290,10 @@ const AllHackathons = () => {
                   {hackathon.title}
                 </h3>
                 <p className={`text-sm text-gray-600 mb-3 leading-relaxed ${
-                  expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? '' : 'line-clamp-3'
+                  clickedHackathon === hackathon.id ? '' : 'line-clamp-3'
                 }`}>
                   {hackathon.description}
-                  {(expandedHackathon === hackathon.id || clickedHackathon === hackathon.id) && (
+                  {clickedHackathon === hackathon.id && (
                     <span className="block mt-3 text-sm text-gray-700">
                       <strong>Organizer:</strong> {hackathon.organizer}<br />
                       <strong>Theme:</strong> {hackathon.theme}<br />

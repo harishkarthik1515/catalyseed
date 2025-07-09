@@ -173,18 +173,20 @@ const SuccessStories = () => {
   };
 
   const handleMouseEnter = (storyId: number) => {
-    setExpandedStory(storyId);
+    // Remove hover expansion - now only click-based
   };
 
   const handleMouseLeave = () => {
-    setExpandedStory(null);
+    // Remove hover expansion - now only click-based
   };
 
   const handleCardClick = (storyId: number) => {
     if (clickedStory === storyId) {
       setClickedStory(null);
+      setExpandedStory(null);
     } else {
       setClickedStory(storyId);
+      setExpandedStory(storyId);
     }
   };
 
@@ -238,15 +240,13 @@ const SuccessStories = () => {
             ref={scrollRef}
             className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 mx-12"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            onMouseLeave={handleMouseLeave}
           >
             {stories.map((story) => (
               <div
                 key={story.id}
                 className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
-                  expandedStory === story.id || clickedStory === story.id ? 'w-[600px] z-10' : 'w-80'
+                  clickedStory === story.id ? 'w-[600px] z-10' : 'w-80'
                 } h-[520px]`}
-                onMouseEnter={() => handleMouseEnter(story.id)}
                 onClick={() => handleCardClick(story.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
@@ -292,10 +292,10 @@ const SuccessStories = () => {
                   {/* Story Content */}
                   <div className="p-3 flex-1 flex flex-col relative">
                     <p className={`text-gray-800 mb-3 leading-relaxed text-sm ${
-                      expandedStory === story.id || clickedStory === story.id ? '' : 'line-clamp-3'
+                      clickedStory === story.id ? '' : 'line-clamp-3'
                     }`}>
                       {story.description}
-                      {(expandedStory === story.id || clickedStory === story.id) && (
+                      {clickedStory === story.id && (
                         <span className="block mt-3 text-sm text-gray-700">
                           <strong>Founded by:</strong> {story.founder}<br />
                           <strong>Institute:</strong> {story.institute}<br />

@@ -169,18 +169,20 @@ const Hackathons = () => {
   };
 
   const handleMouseEnter = (hackathonId: number) => {
-    setExpandedHackathon(hackathonId);
+    // Remove hover expansion - now only click-based
   };
 
   const handleMouseLeave = () => {
-    setExpandedHackathon(null);
+    // Remove hover expansion - now only click-based
   };
 
   const handleCardClick = (hackathonId: number) => {
     if (clickedHackathon === hackathonId) {
       setClickedHackathon(null);
+      setExpandedHackathon(null);
     } else {
       setClickedHackathon(hackathonId);
+      setExpandedHackathon(hackathonId);
     }
   };
 
@@ -234,15 +236,13 @@ const Hackathons = () => {
             ref={scrollRef}
             className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 mx-12"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} 
-            onMouseLeave={handleMouseLeave}
           >
             {hackathons.map((hackathon) => (
               <div
                 key={hackathon.id}
                 className={`flex-shrink-0 group cursor-pointer transition-all duration-500 ease-in-out ${
-                  expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? 'w-[600px] z-10' : 'w-80'
+                  clickedHackathon === hackathon.id ? 'w-[600px] z-10' : 'w-80'
                 } h-[500px]`}
-                onMouseEnter={() => handleMouseEnter(hackathon.id)}
                 onClick={() => handleCardClick(hackathon.id)}
               >
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
@@ -275,10 +275,10 @@ const Hackathons = () => {
                   <div className="p-4 flex-1 flex flex-col">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">{hackathon.title}</h3>
                     <p className={`text-gray-600 mb-3 leading-relaxed text-sm ${
-                      expandedHackathon === hackathon.id || clickedHackathon === hackathon.id ? '' : 'line-clamp-2'
+                      clickedHackathon === hackathon.id ? '' : 'line-clamp-2'
                     }`}>
                       {hackathon.description}
-                      {(expandedHackathon === hackathon.id || clickedHackathon === hackathon.id) && (
+                      {clickedHackathon === hackathon.id && (
                         <span className="block mt-3 text-sm text-gray-700">
                           <strong>Organizer:</strong> {hackathon.organizer}<br />
                           <strong>Theme:</strong> {hackathon.theme}<br />

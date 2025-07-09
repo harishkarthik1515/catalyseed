@@ -206,18 +206,20 @@ const AllSuccessStories = () => {
   };
 
   const handleMouseEnter = (storyId: number) => {
-    setExpandedStory(storyId);
+    // Remove hover expansion - now only click-based
   };
 
   const handleMouseLeave = () => {
-    setExpandedStory(null);
+    // Remove hover expansion - now only click-based
   };
 
   const handleCardClick = (storyId: number) => {
     if (clickedStory === storyId) {
       setClickedStory(null);
+      setExpandedStory(null);
     } else {
       setClickedStory(storyId);
+      setExpandedStory(storyId);
     }
   };
 
@@ -312,14 +314,13 @@ const AllSuccessStories = () => {
         </div>
 
         {/* Stories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6" onMouseLeave={handleMouseLeave}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {filteredStories.map((story) => (
             <div 
               key={story.id}
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 ease-in-out ${
-                expandedStory === story.id || clickedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
+                clickedStory === story.id ? 'sm:col-span-2 lg:col-span-2 xl:col-span-2 z-10 transform scale-105' : ''
               }`}
-              onMouseEnter={() => handleMouseEnter(story.id)}
               onClick={() => handleCardClick(story.id)}
             >
               {/* Story Header */}
@@ -362,10 +363,10 @@ const AllSuccessStories = () => {
               {/* Story Content */}
               <div className="p-3 lg:p-4 relative">
                 <p className={`text-gray-600 mb-4 leading-relaxed text-sm ${
-                  expandedStory === story.id || clickedStory === story.id ? '' : 'line-clamp-2'
+                  clickedStory === story.id ? '' : 'line-clamp-2'
                 }`}>
                   {story.description}
-                  {(expandedStory === story.id || clickedStory === story.id) && (
+                  {clickedStory === story.id && (
                     <span className="block mt-3 text-sm text-gray-700">
                       <strong>Founded by:</strong> {story.founder}<br />
                       <strong>Institute:</strong> {story.institute}<br />
@@ -379,7 +380,7 @@ const AllSuccessStories = () => {
                 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {story.tags.slice(0, (expandedStory === story.id || clickedStory === story.id) ? story.tags.length : 2).map((tag, index) => (
+                  {story.tags.slice(0, clickedStory === story.id ? story.tags.length : 2).map((tag, index) => (
                     <span
                       key={index}
                       className="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs"
@@ -387,7 +388,7 @@ const AllSuccessStories = () => {
                       {tag}
                     </span>
                   ))}
-                  {story.tags.length > 2 && !(expandedStory === story.id || clickedStory === story.id) && (
+                  {story.tags.length > 2 && !(clickedStory === story.id) && (
                     <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
                       +{story.tags.length - 2}
                     </span>
